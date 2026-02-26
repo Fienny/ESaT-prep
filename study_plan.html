@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ESaT Exam Study Plan</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1e293b; } ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+    input[type="checkbox"] { accent-color: #6366f1; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback } = React;
+
+/* ─── DATA ─── */
+const PHASES = [
+  {
+    id: 1, label: "Фаза 1", title: "Основы усилителей",
+    dates: "26 фев — 11 мар", color: "#3b82f6", bg: "#1e3a5f",
+    weeks: [
+      {
+        id:"w1", num:1, title:"Усилители: black box, Bode, фильтры",
+        dates:"26 фев — 4 мар", chapter:"Гл. 1",
+        days:[
+          {id:"w1d1", day:"Пн", topic:"Усилитель как чёрный ящик. Power gain и voltage gain", ref:"§1.1–1.1.2"},
+          {id:"w1d2", day:"Вт", topic:"Типы усилителей: voltage, current, transresistance, transconductance", ref:"§1.1.3–1.1.4"},
+          {id:"w1d3", day:"Ср", topic:"Каскадирование усилителей. Параметры цепочки", ref:"§1.1.5"},
+          {id:"w1d4", day:"Чт", topic:"Частотное поведение. Bode: модуль и фаза (правила построения)", ref:"§1.2–1.2.1"},
+          {id:"w1d5", day:"Пт", topic:"Bode: упражнения на построение диаграмм", ref:"§1.2.1 + упр."},
+          {id:"w1d6", day:"Сб", topic:"Фильтры HPF, LPF: передаточные функции, полюсы/нули", ref:"§1.2.2–1.2.3"},
+          {id:"w1d7", day:"Вс", topic:"Полосовой фильтр. Усилитель с комплексным импедансом", ref:"§1.2.4–1.2.5"},
+        ],
+        formulas:["Gain (dB) = 20·log₁₀(Av)","Каждый полюс: −20 dB/dec, −90° фазы","HPF: H(jω) = jω/(jω+ω₀) | LPF: H(jω) = ω₀/(jω+ω₀)"],
+      },
+      {
+        id:"w2", num:2, title:"Линейность + Пассивные компоненты",
+        dates:"5 — 11 мар", chapter:"Гл. 1 + Гл. 9",
+        days:[
+          {id:"w2d1", day:"Пн", topic:"Полоса пропускания усилителя. Линейность", ref:"§1.2.6–1.3"},
+          {id:"w2d2", day:"Вт", topic:"Gain/offset error, нелинейные усилители, насыщение", ref:"§1.3.1–1.3.3"},
+          {id:"w2d3", day:"Ср", topic:"Резисторы: номиналы E-series, допуски, рассеивание мощности", ref:"§9.1–9.1.2"},
+          {id:"w2d4", day:"Чт", topic:"Резисторы: макс. напряжение, TK, паразитные параметры, шум", ref:"§9.1.3–9.1.5"},
+          {id:"w2d5", day:"Пт", topic:"Конденсаторы: типы (ceramic, film, electrolytic), паразитные параметры", ref:"§9.2"},
+          {id:"w2d6", day:"Сб", topic:"Катушки индуктивности. Упражнения гл. 1", ref:"§9.3 + §1.5"},
+          {id:"w2d7", day:"Вс", topic:"Разбор решений гл. 1 (Appendix A.1)", ref:"App. A.1"},
+        ],
+        formulas:["E12/E24: стандартные ряды номиналов резисторов","Реальный конденсатор: ESR + ESL в схеме","Электролит: полярность! Только в одном направлении"],
+      },
+    ],
+  },
+  {
+    id: 2, label: "Фаза 2", title: "Операционный усилитель",
+    dates: "12 мар — 8 апр", color: "#8b5cf6", bg: "#2d1f5e",
+    weeks: [
+      {
+        id:"w3", num:3, title:"ОУ: идеальный и реальный",
+        dates:"12 — 18 мар", chapter:"Гл. 2",
+        days:[
+          {id:"w3d1", day:"Пн", topic:"Идеальный ОУ: правила анализа (V⁺=V⁻, Iin=0). Инверт./неинверт.", ref:"§2.1–2.1.1"},
+          {id:"w3d2", day:"Вт", topic:"Неидеальный ОУ: конечный Aol. Анализ с обратной связью", ref:"§2.1.2"},
+          {id:"w3d3", day:"Ср", topic:"Voltage follower, transresistance, current amp, transconductance amp", ref:"§2.1.3–2.1.6"},
+          {id:"w3d4", day:"Чт", topic:"Инвертирующий усилитель. Дифф./синфазный сигналы", ref:"§2.1.7–2.2"},
+          {id:"w3d5", day:"Пт", topic:"CMRR. Offset тока и напряжения реального ОУ", ref:"§2.2–2.3.1"},
+          {id:"w3d6", day:"Сб", topic:"Диапазон вх./вых. напряжения, входной импеданс", ref:"§2.3.2–2.3.4"},
+          {id:"w3d7", day:"Вс", topic:"Differential gain и common mode gain. Упражнения", ref:"§2.3.5–2.3.6"},
+        ],
+        formulas:["Инверт.: Av = −Rf/Rin","Неинверт.: Av = 1 + Rf/Rin","CMRR = |Ad/Acm| → дБ: 20·log₁₀(CMRR)"],
+      },
+      {
+        id:"w4", num:4, title:"ОУ: Проектирование и частотное поведение",
+        dates:"19 — 25 мар", chapter:"Гл. 2",
+        days:[
+          {id:"w4d1", day:"Пн", topic:"Проектирование по спецификациям: задание, выбор компонентов", ref:"§2.4"},
+          {id:"w4d2", day:"Вт", topic:"Разбор design example из учебника", ref:"§2.4.1–2.4.2"},
+          {id:"w4d3", day:"Ср", topic:"Частотное поведение ОУ: передаточная функция с ОС", ref:"§2.5–2.5.2"},
+          {id:"w4d4", day:"Чт", topic:"Gain-Bandwidth Product (GBW). Расчёт полосы для заданного gain", ref:"§2.5.3"},
+          {id:"w4d5", day:"Пт", topic:"Slew Rate: определение, последствия, расчёт", ref:"§2.5.4"},
+          {id:"w4d6", day:"Сб", topic:"Упражнения гл. 2 (смещения, GBW, SR)", ref:"§2.6"},
+          {id:"w4d7", day:"Вс", topic:"Разбор решений (Appendix A.2)", ref:"App. A.2"},
+        ],
+        formulas:["GBW = Aol · f₋₃dB = const (для данного ОУ)","Slew Rate: SR = ΔVout/Δt [V/μs]","При проектировании: сначала gain → потом GBW и SR"],
+      },
+      {
+        id:"w5", num:5, title:"Применения ОУ",
+        dates:"26 мар — 1 апр", chapter:"Гл. 3",
+        days:[
+          {id:"w5d1", day:"Пн", topic:"Интегратор: схема, передаточная функция, проблема offset", ref:"§3.1–3.1.1"},
+          {id:"w5d2", day:"Вт", topic:"Дифференциатор. Инвертирующий сумматор", ref:"§3.1.2–3.1.3"},
+          {id:"w5d3", day:"Ср", topic:"Дифференциальный усилитель: анализ, CMRR", ref:"§3.2"},
+          {id:"w5d4", day:"Чт", topic:"Неинвертирующий сумматор. Обобщённый сумматор", ref:"§3.3–3.4"},
+          {id:"w5d5", day:"Пт", topic:"Инструментальный усилитель (IA): требования, EMC", ref:"§3.5–3.5.2"},
+          {id:"w5d6", day:"Сб", topic:"Схемы IA: 1-ОУ, 2-ОУ, 3-ОУ. Расчёт CMRR", ref:"§3.5.3"},
+          {id:"w5d7", day:"Вс", topic:"Аудиоусилители. Однополярное питание (virtual ground)", ref:"§3.6–3.7"},
+        ],
+        formulas:["Интегратор: Vout = −(1/RC)∫Vin·dt","Диффер.: Vout = −RC·dVin/dt (→ ставь R последовательно!)","IA: gain = 1 + 2Rf/Rg; высокий CMRR, высокий Zin"],
+      },
+      {
+        id:"w6", num:6, title:"Нелинейные усилители (выпрямители)",
+        dates:"2 — 8 апр", chapter:"Гл. 4",
+        days:[
+          {id:"w6d1", day:"Пн", topic:"Прецизионный полуволновой выпрямитель: принцип, схема", ref:"§4.1"},
+          {id:"w6d2", day:"Вт", topic:"Смещение характеристики (shift of transfer characteristic)", ref:"§4.1.1"},
+          {id:"w6d3", day:"Ср", topic:"Полноволновой выпрямитель: схема и анализ", ref:"§4.2"},
+          {id:"w6d4", day:"Чт", topic:"Расширенный полноволновой выпрямитель", ref:"§4.2.1"},
+          {id:"w6d5", day:"Пт", topic:"Design example для полноволнового выпрямителя", ref:"§4.2.2"},
+          {id:"w6d6", day:"Сб", topic:"Частотное поведение выпрямителей, влияние SR", ref:"§4.2.3–4.2.4"},
+          {id:"w6d7", day:"Вс", topic:"Упражнения гл. 3 и 4, разбор решений (A.3, A.4)", ref:"App. A.3–A.4"},
+        ],
+        formulas:["ОУ компенсирует Vdiode ≈ 0.6 В через петлю ОС","Работает точно только в пределах SR и GBW","При отрицательном Vin: ОУ уходит в насыщение → важно ограничение скорости"],
+      },
+    ],
+  },
+  {
+    id: 3, label: "Фаза 3", title: "ОУ вне линейности + Полупроводники",
+    dates: "9 — 29 апр", color: "#ec4899", bg: "#4a1535",
+    weeks: [
+      {
+        id:"w7", num:7, title:"Компараторы и генераторы",
+        dates:"9 — 15 апр", chapter:"Гл. 5",
+        days:[
+          {id:"w7d1", day:"Пн", topic:"Компараторы: инверт./неинверт. Бинарное решение", ref:"§5.1–5.1.3"},
+          {id:"w7d2", day:"Вт", topic:"Чувствительность к шуму. Компараторы с гистерезисом (Schmitt trigger)", ref:"§5.1.4–5.1.5"},
+          {id:"w7d3", day:"Ср", topic:"Реализация компараторов на ИС", ref:"§5.1.6"},
+          {id:"w7d4", day:"Чт", topic:"Астабильный мультивибратор: принцип, анализ, расчёт T", ref:"§5.2"},
+          {id:"w7d5", day:"Пт", topic:"Генератор треугольных волн: принцип, кол. анализ", ref:"§5.3–5.3.1"},
+          {id:"w7d6", day:"Сб", topic:"Design example для генератора треугольных волн", ref:"§5.3.2"},
+          {id:"w7d7", day:"Вс", topic:"Упражнения гл. 5, разбор решений (A.5)", ref:"App. A.5"},
+        ],
+        formulas:["Schmitt (инверт.): VTH = Vsat·R1/(R1+R2)","Астабильный: T = 2RC·ln((1+β)/(1−β)), β=R1/(R1+R2)","Треугольный: fout зависит от RC интегратора и порогов Schmitt"],
+      },
+      {
+        id:"w8", num:8, title:"Полупроводники и диоды",
+        dates:"16 — 22 апр", chapter:"Гл. 6 (ч.1)",
+        days:[
+          {id:"w8d1", day:"Пн", topic:"Полупроводники: зонная модель, генерация/рекомбинация, легирование", ref:"§6.1–6.1.3"},
+          {id:"w8d2", day:"Вт", topic:"Токи в полупроводнике: дрейф и диффузия", ref:"§6.1.4"},
+          {id:"w8d3", day:"Ср", topic:"p-n переход: физика, обеднённый слой, встроенный потенциал", ref:"§6.2.1"},
+          {id:"w8d4", day:"Чт", topic:"Диод: статическая характеристика, уравнение Шокли, модели", ref:"§6.2.2–6.2.3"},
+          {id:"w8d5", day:"Пт", topic:"Применение диодов: ограничитель, клиппер, схемы защиты", ref:"§6.2.4–6.2.6"},
+          {id:"w8d6", day:"Сб", topic:"Стабилитроны (Zener): характеристика, схема стабилизатора", ref:"§6.2.5"},
+          {id:"w8d7", day:"Вс", topic:"Упражнения на диоды и стабилитроны (A.6.1–A.6.3)", ref:"App. A.6"},
+        ],
+        formulas:["Диод: I = Is·(e^(V/VT) − 1), VT ≈ 26 мВ при 300 К","Прямое напряжение Si ≈ 0.6–0.7 В","Zener: работает в обратном пробое, стабилизирует Vz"],
+      },
+      {
+        id:"w9", num:9, title:"BJT и MOSFET",
+        dates:"23 — 29 апр", chapter:"Гл. 6 (ч.2–3)",
+        days:[
+          {id:"w9d1", day:"Пн", topic:"BJT: структура, режимы (активный, насыщение, отсечка)", ref:"§6.3"},
+          {id:"w9d2", day:"Вт", topic:"BJT как усилитель: рабочая точка, малосигнальная модель", ref:"§6.3.1"},
+          {id:"w9d3", day:"Ср", topic:"BJT: схемы смещения, расчёт Q-point", ref:"§6.3.1 (продолж.)"},
+          {id:"w9d4", day:"Чт", topic:"MOSFET: MOS-конденсатор, принцип работы n-MOSFET", ref:"§6.4–6.4.2"},
+          {id:"w9d5", day:"Пт", topic:"p-MOSFET, пробой, символы, MOSFET как усилитель", ref:"§6.4.3–6.4.6"},
+          {id:"w9d6", day:"Сб", topic:"Упражнения на BJT (A.6.4–A.6.6)", ref:"App. A.6"},
+          {id:"w9d7", day:"Вс", topic:"Упражнения на MOSFET (A.6.7) + повторение гл. 6", ref:"App. A.6"},
+        ],
+        formulas:["BJT: IC = β·IB; VBE ≈ 0.7 В; gm = IC/VT","MOSFET sat.: ID = (μnCox/2)·(W/L)·(VGS−Vth)²","MOSFET linear: ID = μnCox·(W/L)·[(VGS−Vth)VDS − VDS²/2]"],
+      },
+    ],
+  },
+  {
+    id: 4, label: "Фаза 4", title: "Цифровая электроника",
+    dates: "30 апр — 13 мая", color: "#10b981", bg: "#0f3526",
+    weeks: [
+      {
+        id:"w10", num:10, title:"Транзисторы в ключевом режиме",
+        dates:"30 апр — 6 мая", chapter:"Гл. 7",
+        days:[
+          {id:"w10d1", day:"Пн", topic:"BJT-ключ: насыщение, расчёт тока базы, overdrive factor", ref:"§7.1–7.1.1"},
+          {id:"w10d2", day:"Вт", topic:"BJT switch: design example, параметры насыщения", ref:"§7.1.2"},
+          {id:"w10d3", day:"Ср", topic:"MOSFET-ключ: открытый/закрытый ключ, Ron", ref:"§7.2–7.2.1"},
+          {id:"w10d4", day:"Чт", topic:"MOSFET switch: design example", ref:"§7.2.2"},
+          {id:"w10d5", day:"Пт", topic:"Динамическое поведение диода при переключении", ref:"§7.3–7.3.1"},
+          {id:"w10d6", day:"Сб", topic:"Динамика BJT и MOSFET. Паразитные ёмкости", ref:"§7.3.2–7.3.3"},
+          {id:"w10d7", day:"Вс", topic:"Упражнения гл. 7 (Appendix A.7)", ref:"App. A.7"},
+        ],
+        formulas:["BJT в насыщении: VCE(sat) ≈ 0.2 В; IB > IC/β","MOSFET: ключ управляется VGS; в статике Igate = 0","Время переключения: заряд Cgate (MOSFET) / заряд носителей (BJT)"],
+      },
+      {
+        id:"w11", num:11, title:"Логические схемы",
+        dates:"7 — 13 мая", chapter:"Гл. 8",
+        days:[
+          {id:"w11d1", day:"Пн", topic:"Параметры логических элементов: VOH, VOL, VIH, VIL, NMH, NML", ref:"§8.1–8.1.3"},
+          {id:"w11d2", day:"Вт", topic:"Fan-out, семейства логики (TTL, CMOS, LVTTL)", ref:"§8.1.4–8.1.5"},
+          {id:"w11d3", day:"Ср", topic:"Неподключённые входы. Выходные схемы (totem-pole, OC, tristate)", ref:"§8.1.6–8.1.7"},
+          {id:"w11d4", day:"Чт", topic:"CMOS gates: комплементарная логика, nMOS-like логика", ref:"§8.2"},
+          {id:"w11d5", day:"Пт", topic:"Примеры: fan-out расчёт, управление LED, wired-OR", ref:"§8.3"},
+          {id:"w11d6", day:"Сб", topic:"Динамика логических элементов: задержка, мощность", ref:"§8.4"},
+          {id:"w11d7", day:"Вс", topic:"Последовательные схемы: SR-latch, D-latch, D flip-flop", ref:"§8.5"},
+        ],
+        formulas:["NMH = VOH − VIH;  NML = VIL − VOL","CMOS мощность: P ≈ f·C·VDD²","tpHL, tpLH: propagation delay; setup/hold time у триггеров"],
+      },
+    ],
+  },
+  {
+    id: 5, label: "Фаза 5", title: "Измерительные приборы",
+    dates: "14 — 27 мая", color: "#f59e0b", bg: "#3d2a00",
+    weeks: [
+      {
+        id:"w12", num:12, title:"DSO и DMM",
+        dates:"14 — 20 мая", chapter:"Слайды Carullo",
+        days:[
+          {id:"w12d1", day:"Пн", topic:"DSO: принцип работы, последовательная архитектура", ref:"DSO_architecture.pdf"},
+          {id:"w12d2", day:"Вт", topic:"DSO: входное кондиционирование, АЦП, память выборок", ref:"DSO slides"},
+          {id:"w12d3", day:"Ср", topic:"DSO: триггер, режимы запуска, временная база", ref:"DSO slides"},
+          {id:"w12d4", day:"Чт", topic:"DMM: блок-схема, секция DCV (аттенюатор, дифф. усилитель)", ref:"Digital_Multi_Meter.pdf"},
+          {id:"w12d5", day:"Пт", topic:"DMM: секции ACV, DCI, ACI, RES. АЦП интегрирующего типа", ref:"DMM slides"},
+          {id:"w12d6", day:"Сб", topic:"DMM: аннотированная версия (with_annotation.pdf)", ref:"DMM_annotated.pdf"},
+          {id:"w12d7", day:"Вс", topic:"Сравнение DSO vs DMM: применения, ограничения, точность", ref:"Оба материала"},
+        ],
+        formulas:["Nyquist: fs ≥ 2·fmax для корректной выборки","DSO вертикальное разрешение: N бит → 2ᴺ уровней","DMM входное сопротивление: 10 МОм (DCV), >10 ГОм (дифф.)"],
+      },
+      {
+        id:"w13", num:13, title:"Неопределённость измерений",
+        dates:"21 — 27 мая", chapter:"Слайды Carullo",
+        days:[
+          {id:"w13d1", day:"Пн", topic:"Термины: error, precision, accuracy, uncertainty, resolution", ref:"Uncertainty_deterministic...pdf"},
+          {id:"w13d2", day:"Вт", topic:"Источники неопределённости. Классификация методов измерения", ref:"Slides (index)"},
+          {id:"w13d3", day:"Ср", topic:"Детерминированный подход: интерпретация неопределённости", ref:"Slides"},
+          {id:"w13d4", day:"Чт", topic:"Распространение неопределённости: формулы для операций", ref:"Slides"},
+          {id:"w13d5", day:"Пт", topic:"Примеры расчёта полной неопределённости для схем", ref:"Практика"},
+          {id:"w13d6", day:"Сб", topic:"Повторение блока измерений + self-test", ref:"Все слайды Carullo"},
+          {id:"w13d7", day:"Вс", topic:"Практика: расчёт погрешности DSO и DMM", ref:"Практика"},
+        ],
+        formulas:["Uncertainty ≠ error (это диапазон возможных значений)","Worst-case: Δy = Σ|∂f/∂xᵢ|·Δxᵢ","Точность DMM обычно: ±(% rdg + % FS)"],
+      },
+    ],
+  },
+  {
+    id: 6, label: "Фаза 6", title: "Финальный review",
+    dates: "28 — 31 мая", color: "#ef4444", bg: "#3d0f0f",
+    weeks: [
+      {
+        id:"w14", num:14, title:"Итоговое повторение + Mock exam",
+        dates:"28 — 31 мая", chapter:"Весь курс",
+        days:[
+          {id:"w14d1", day:"Чт", topic:"Повторение фаз 1–2: усилители и ОУ, формулы, типовые ошибки", ref:"Гл. 1–4"},
+          {id:"w14d2", day:"Пт", topic:"Повторение фаз 3–4: нелинейные схемы, полупроводники, логика", ref:"Гл. 5–8"},
+          {id:"w14d3", day:"Сб", topic:"Повторение фазы 5: DSO, DMM, неопределённость + сложные упражнения", ref:"Слайды"},
+          {id:"w14d4", day:"Вс", topic:"MOCK EXAM: по 1–2 упражнения из каждой главы на время", ref:"Appendix A"},
+        ],
+        formulas:["Проверь: можешь ли нарисовать Bode не глядя?","Проверь: анализ ОУ-схем за 2 минуты?","Проверь: расчёт Q-point BJT/MOSFET самостоятельно?"],
+      },
+    ],
+  },
+];
+
+const PRIORITIES = [
+  { rank: 1, label: "Критически важно", color: "#ef4444", topics: ["Гл. 2 — Операционный усилитель", "Гл. 3 — Применения ОУ"] },
+  { rank: 2, label: "Очень важно", color: "#f59e0b", topics: ["Гл. 1 — Bode диаграммы", "Гл. 5 — Компараторы и генераторы", "Гл. 8 — Логика"] },
+  { rank: 3, label: "Важно", color: "#3b82f6", topics: ["Гл. 6 — Диоды, BJT, MOSFET", "DSO / DMM / Uncertainty"] },
+  { rank: 4, label: "Желательно", color: "#6b7280", topics: ["Гл. 4 — Выпрямители", "Гл. 7 — Ключевой режим", "Гл. 9 — Пассивные компоненты"] },
+];
+
+/* ─── STORAGE ─── */
+const STORAGE_KEY = "esat_plan_v1";
+function loadChecked() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+  catch { return {}; }
+}
+function saveChecked(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch {}
+}
+
+/* ─── ALL IDS ─── */
+const ALL_IDS = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.map(d => d.id)));
+
+/* ─── WEEK CARD ─── */
+function WeekCard({ week, phaseColor, checked, onToggle }) {
+  const [open, setOpen] = useState(false);
+  const weekIds = week.days.map(d => d.id);
+  const doneCount = weekIds.filter(id => checked[id]).length;
+  const pct = Math.round((doneCount / weekIds.length) * 100);
+
+  return (
+    <div style={{ background:"#0f172a", borderRadius:10, border:`1px solid ${open ? phaseColor+"66" : "#1e293b"}`, marginBottom:10, overflow:"hidden", transition:"border-color .2s" }}>
+      {/* header */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"12px 16px", display:"flex", alignItems:"center", gap:12, textAlign:"left" }}
+      >
+        <span style={{ color: phaseColor, fontSize:13, fontWeight:600, minWidth:60 }}>Нед. {week.num}</span>
+        <div style={{ flex:1 }}>
+          <div style={{ color:"#e2e8f0", fontSize:14, fontWeight:500, marginBottom:2 }}>{week.title}</div>
+          <div style={{ color:"#64748b", fontSize:12 }}>{week.dates} · {week.chapter}</div>
+        </div>
+        {/* progress pill */}
+        <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
+          <div style={{ background:"#1e293b", borderRadius:99, width:80, height:6, overflow:"hidden" }}>
+            <div style={{ background: phaseColor, width:`${pct}%`, height:"100%", transition:"width .3s", borderRadius:99 }} />
+          </div>
+          <span style={{ color: doneCount === weekIds.length ? "#10b981" : "#64748b", fontSize:12, minWidth:36 }}>
+            {doneCount}/{weekIds.length}
+          </span>
+          <span style={{ color:"#475569", fontSize:12, transform: open ? "rotate(180deg)" : "none", transition:"transform .2s" }}>▼</span>
+        </div>
+      </button>
+
+      {/* body */}
+      {open && (
+        <div style={{ borderTop:"1px solid #1e293b", padding:"12px 16px" }}>
+          {/* days */}
+          <div style={{ marginBottom:12 }}>
+            {week.days.map(day => (
+              <label key={day.id} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"7px 0", borderBottom:"1px solid #1e293b", cursor:"pointer" }}>
+                <input type="checkbox" checked={!!checked[day.id]} onChange={() => onToggle(day.id)} style={{ marginTop:2 }} />
+                <span style={{ color:"#94a3b8", fontSize:12, fontWeight:600, minWidth:24 }}>{day.day}</span>
+                <div style={{ flex:1 }}>
+                  <span style={{ color: checked[day.id] ? "#475569" : "#e2e8f0", fontSize:13, textDecoration: checked[day.id] ? "line-through" : "none", transition:"color .2s" }}>
+                    {day.topic}
+                  </span>
+                </div>
+                <span style={{ color:"#334155", fontSize:11, flexShrink:0, marginTop:1 }}>{day.ref}</span>
+              </label>
+            ))}
+          </div>
+          {/* formulas */}
+          <div style={{ background:"#0d1f3c", borderRadius:8, padding:"10px 14px", borderLeft:`3px solid ${phaseColor}` }}>
+            <div style={{ color:"#94a3b8", fontSize:11, fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Ключевые формулы</div>
+            {week.formulas.map((f, i) => (
+              <div key={i} style={{ color:"#7dd3fc", fontSize:12, fontFamily:"'Courier New', monospace", padding:"2px 0" }}>→ {f}</div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── PHASE CARD ─── */
+function PhaseCard({ phase, checked, onToggle }) {
+  const [open, setOpen] = useState(false);
+  const phaseIds = phase.weeks.flatMap(w => w.days.map(d => d.id));
+  const done = phaseIds.filter(id => checked[id]).length;
+  const pct = Math.round((done / phaseIds.length) * 100);
+
+  return (
+    <div style={{ borderRadius:14, border:`1px solid ${phase.color}44`, background: phase.bg, marginBottom:16, overflow:"hidden" }}>
+      {/* phase header */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"16px 20px", display:"flex", alignItems:"center", gap:14, textAlign:"left" }}
+      >
+        <div style={{ background: phase.color+"33", borderRadius:8, padding:"6px 12px", border:`1px solid ${phase.color}55` }}>
+          <span style={{ color: phase.color, fontSize:12, fontWeight:700 }}>{phase.label}</span>
+        </div>
+        <div style={{ flex:1 }}>
+          <div style={{ color:"#f1f5f9", fontSize:16, fontWeight:600 }}>{phase.title}</div>
+          <div style={{ color:"#64748b", fontSize:12, marginTop:2 }}>{phase.dates} · {phase.weeks.length} {phase.weeks.length === 1 ? "неделя" : "недели"}</div>
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
+          <div style={{ textAlign:"right" }}>
+            <div style={{ color: pct === 100 ? "#10b981" : phase.color, fontSize:20, fontWeight:700 }}>{pct}%</div>
+            <div style={{ color:"#475569", fontSize:11 }}>{done}/{phaseIds.length}</div>
+          </div>
+          <span style={{ color:"#475569", fontSize:14, transform: open ? "rotate(180deg)" : "none", transition:"transform .2s" }}>▼</span>
+        </div>
+      </button>
+      {/* phase progress bar */}
+      <div style={{ height:3, background:"#1e293b", margin:"0 20px" }}>
+        <div style={{ height:"100%", background: phase.color, width:`${pct}%`, transition:"width .4s", borderRadius:99 }} />
+      </div>
+
+      {open && (
+        <div style={{ padding:"16px 20px 8px" }}>
+          {phase.weeks.map(w => <WeekCard key={w.id} week={w} phaseColor={phase.color} checked={checked} onToggle={onToggle} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── HEADER STATS ─── */
+function Header({ checked }) {
+  const done = ALL_IDS.filter(id => checked[id]).length;
+  const pct = Math.round((done / ALL_IDS.length) * 100);
+
+  // weeks elapsed
+  const start = new Date("2026-02-26");
+  const now = new Date();
+  const weeksElapsed = Math.min(14, Math.max(0, Math.floor((now - start) / (7 * 86400000))));
+  const weeksLeft = Math.max(0, 14 - weeksElapsed);
+
+  return (
+    <div style={{ background:"linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", borderRadius:16, padding:"24px 28px", marginBottom:24, border:"1px solid #334155" }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:16, marginBottom:20 }}>
+        <div>
+          <h1 style={{ color:"#f1f5f9", fontSize:22, fontWeight:700, marginBottom:4 }}>
+            Electronic Systems & Technologies
+          </h1>
+          <div style={{ color:"#64748b", fontSize:13 }}>
+            Экзамен — начало июня 2026 · 14 недель · ~10–12 ч/нед
+          </div>
+        </div>
+        <div style={{ display:"flex", gap:16 }}>
+          {[
+            { label:"Тем сделано", value:`${done}/${ALL_IDS.length}`, color:"#6366f1" },
+            { label:"Недель прошло", value:`${weeksElapsed}/14`, color:"#8b5cf6" },
+            { label:"Осталось недель", value:weeksLeft, color: weeksLeft <= 2 ? "#ef4444" : "#10b981" },
+          ].map(s => (
+            <div key={s.label} style={{ background:"#0f172a", borderRadius:10, padding:"10px 16px", textAlign:"center", border:"1px solid #1e293b" }}>
+              <div style={{ color: s.color, fontSize:20, fontWeight:700 }}>{s.value}</div>
+              <div style={{ color:"#64748b", fontSize:11, marginTop:2 }}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* global progress */}
+      <div style={{ display:"flex", alignItems:"center", gap:12 }}>
+        <div style={{ flex:1, background:"#1e293b", borderRadius:99, height:10, overflow:"hidden" }}>
+          <div style={{ height:"100%", background:"linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899)", width:`${pct}%`, transition:"width .5s", borderRadius:99 }} />
+        </div>
+        <span style={{ color:"#e2e8f0", fontWeight:700, fontSize:15, minWidth:40 }}>{pct}%</span>
+      </div>
+    </div>
+  );
+}
+
+/* ─── PRIORITY SECTION ─── */
+function PrioritySection() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div style={{ background:"#1e293b", borderRadius:14, border:"1px solid #334155", marginTop:16 }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"14px 20px", display:"flex", justifyContent:"space-between", alignItems:"center" }}
+      >
+        <span style={{ color:"#e2e8f0", fontWeight:600, fontSize:15 }}>Приоритеты (если не хватает времени)</span>
+        <span style={{ color:"#475569", transform: open ? "rotate(180deg)" : "none", transition:"transform .2s" }}>▼</span>
+      </button>
+      {open && (
+        <div style={{ padding:"4px 20px 16px", display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(220px, 1fr))", gap:12 }}>
+          {PRIORITIES.map(p => (
+            <div key={p.rank} style={{ background:"#0f172a", borderRadius:10, padding:"12px 14px", borderTop:`3px solid ${p.color}` }}>
+              <div style={{ color: p.color, fontSize:11, fontWeight:700, textTransform:"uppercase", marginBottom:8, letterSpacing:.5 }}>
+                {p.rank}. {p.label}
+              </div>
+              {p.topics.map(t => (
+                <div key={t} style={{ color:"#94a3b8", fontSize:12, padding:"3px 0", display:"flex", gap:6 }}>
+                  <span style={{ color: p.color }}>·</span> {t}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── APP ─── */
+function App() {
+  const [checked, setChecked] = useState(loadChecked);
+
+  const toggle = useCallback((id) => {
+    setChecked(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      saveChecked(next);
+      return next;
+    });
+  }, []);
+
+  const resetAll = () => {
+    if (confirm("Сбросить весь прогресс?")) {
+      setChecked({});
+      saveChecked({});
+    }
+  };
+
+  return (
+    <div style={{ maxWidth:860, margin:"0 auto", padding:"24px 16px 48px" }}>
+      <Header checked={checked} />
+
+      <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:12 }}>
+        <button
+          onClick={resetAll}
+          style={{ background:"none", border:"1px solid #334155", color:"#64748b", borderRadius:8, padding:"6px 14px", fontSize:12, cursor:"pointer" }}
+        >
+          Сбросить прогресс
+        </button>
+      </div>
+
+      {PHASES.map(phase => (
+        <PhaseCard key={phase.id} phase={phase} checked={checked} onToggle={toggle} />
+      ))}
+
+      <PrioritySection />
+
+      <div style={{ textAlign:"center", color:"#334155", fontSize:12, marginTop:24 }}>
+        Прогресс сохраняется автоматически в localStorage браузера
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
