@@ -2,25 +2,30 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ESaT Exam Study Plan</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Study Plan — ESaT &amp; AES</title>
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
     ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #1e293b; } ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-    input[type="checkbox"] { accent-color: #6366f1; width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; }
+    button { -webkit-tap-highlight-color: transparent; touch-action: manipulation; min-height: 44px; }
+    label { touch-action: manipulation; cursor: pointer; }
+    input[type="checkbox"] { accent-color: #6366f1; width: 20px; height: 20px; min-width: 20px; cursor: pointer; flex-shrink: 0; }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useEffect, useCallback } = React;
+const { useState, useCallback } = React;
 
-/* ─── DATA ─── */
+/* ═══════════════════════════════════════════════════
+   ESAT DATA
+═══════════════════════════════════════════════════ */
 const PHASES = [
   {
     id: 1, label: "Фаза 1", title: "Основы усилителей",
@@ -216,7 +221,7 @@ const PHASES = [
           {id:"w12d6", day:"Сб", topic:"DMM: аннотированная версия (with_annotation.pdf)", ref:"DMM_annotated.pdf"},
           {id:"w12d7", day:"Вс", topic:"Сравнение DSO vs DMM: применения, ограничения, точность", ref:"Оба материала"},
         ],
-        formulas:["Nyquist: fs ≥ 2·fmax для корректной выборки","DSO вертикальное разрешение: N бит → 2ᴺ уровней","DMM входное сопротивление: 10 МОм (DCV), >10 ГОм (дифф.)"],
+        formulas:["Nyquist: fs ≥ 2·fmax для корректной выборки","DSO вертикальное разрешение: N бит → 2ᴺ уровней","DMM входное сопротивление: 10 МОм (DCV)"],
       },
       {
         id:"w13", num:13, title:"Неопределённость измерений",
@@ -253,15 +258,82 @@ const PHASES = [
   },
 ];
 
-const PRIORITIES = [
-  { rank: 1, label: "Критически важно", color: "#ef4444", topics: ["Гл. 2 — Операционный усилитель", "Гл. 3 — Применения ОУ"] },
-  { rank: 2, label: "Очень важно", color: "#f59e0b", topics: ["Гл. 1 — Bode диаграммы", "Гл. 5 — Компараторы и генераторы", "Гл. 8 — Логика"] },
-  { rank: 3, label: "Важно", color: "#3b82f6", topics: ["Гл. 6 — Диоды, BJT, MOSFET", "DSO / DMM / Uncertainty"] },
-  { rank: 4, label: "Желательно", color: "#6b7280", topics: ["Гл. 4 — Выпрямители", "Гл. 7 — Ключевой режим", "Гл. 9 — Пассивные компоненты"] },
+const ESAT_ALL_IDS = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.map(d => d.id)));
+
+/* ═══════════════════════════════════════════════════
+   AES DATA  (source: filenames in /aes/)
+═══════════════════════════════════════════════════ */
+const AES_MODULES = [
+  {
+    id:"aesA", label:"Модуль A", title:"Введение",
+    color:"#06b6d4", bg:"#0a2233",
+    lectures:[
+      {id:"aA1", code:"A0", title:"Introduction to Applied Electronics"},
+    ],
+  },
+  {
+    id:"aesB", label:"Модуль B", title:"Последовательные схемы",
+    color:"#a855f7", bg:"#1e1035",
+    lectures:[
+      {id:"aB1", code:"B3",  title:"Sequential Circuits"},
+      {id:"aB2", code:"Be1", title:"Sequential Circuits — Exercises"},
+    ],
+  },
+  {
+    id:"aesD", label:"Модуль D", title:"Аналого-цифровое преобразование",
+    color:"#f97316", bg:"#2a1500",
+    lectures:[
+      {id:"aD1", code:"D1", title:"Introduction to A/D and D/A Conversion"},
+      {id:"aD2", code:"D2", title:"D/A Converters"},
+      {id:"aD3", code:"D3", title:"A/D Converters"},
+      {id:"aD4", code:"D5", title:"Signal Conditioning"},
+    ],
+  },
+  {
+    id:"aesC", label:"Модуль C", title:"Межсоединения и протоколы",
+    color:"#14b8a6", bg:"#0a2220",
+    lectures:[
+      {id:"aC1",  code:"C1", title:"Interconnections — Part 1"},
+      {id:"aC2",  code:"C1", title:"Interconnections — Part 2"},
+      {id:"aC3",  code:"C2", title:"Transmission Lines — Part 1"},
+      {id:"aC4",  code:"C2", title:"Transmission Lines — Part 2"},
+      {id:"aC5",  code:"C3", title:"Interconnections with Transmission Lines — Part 1"},
+      {id:"aC6",  code:"C3", title:"Interconnections with Transmission Lines — Part 2"},
+      {id:"aC7",  code:"C4", title:"Communication Protocols — Part 1"},
+      {id:"aC8",  code:"C4", title:"Communication Protocols — Part 2"},
+      {id:"aC9",  code:"C5", title:"Bus Protocols"},
+      {id:"aC10", code:"C6", title:"Serial Communications"},
+      {id:"aC11", code:"C7", title:"Signal Integrity"},
+    ],
+  },
+  {
+    id:"aesE", label:"Модуль E", title:"Источники питания",
+    color:"#eab308", bg:"#1f1a00",
+    lectures:[
+      {id:"aE1", code:"E2", title:"Linear Voltage Regulators"},
+      {id:"aE2", code:"E3", title:"Switching Regulators"},
+      {id:"aE3", code:"Ee", title:"Power Electronics — All Topics"},
+    ],
+  },
+  {
+    id:"aesR", label:"Ресурсы", title:"Слайды и экзамены",
+    color:"#6b7280", bg:"#1a1f2e",
+    lectures:[
+      {id:"aR1", code:"Ce1",  title:"Interconnessioni — Part 1 (Italian slides)"},
+      {id:"aR2", code:"Ce1",  title:"Interconnessioni — Part 2 (Italian slides)"},
+      {id:"aR3", code:"Ce1",  title:"Interconnessioni (Italian slides)"},
+      {id:"aR4", code:"2018", title:"Exam Correction — March 2018"},
+      {id:"aR5", code:"2021", title:"Exam Solution — July 2021"},
+    ],
+  },
 ];
 
-/* ─── STORAGE ─── */
-const STORAGE_KEY = "esat_plan_v1";
+const AES_ALL_IDS = AES_MODULES.flatMap(m => m.lectures.map(l => l.id));
+
+/* ═══════════════════════════════════════════════════
+   STORAGE
+═══════════════════════════════════════════════════ */
+const STORAGE_KEY = "study_plan_v2";
 function loadChecked() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
   catch { return {}; }
@@ -271,10 +343,9 @@ function saveChecked(data) {
   catch {}
 }
 
-/* ─── ALL IDS ─── */
-const ALL_IDS = PHASES.flatMap(p => p.weeks.flatMap(w => w.days.map(d => d.id)));
-
-/* ─── WEEK CARD ─── */
+/* ═══════════════════════════════════════════════════
+   ESAT COMPONENTS
+═══════════════════════════════════════════════════ */
 function WeekCard({ week, phaseColor, checked, onToggle }) {
   const [open, setOpen] = useState(false);
   const weekIds = week.days.map(d => d.id);
@@ -282,52 +353,45 @@ function WeekCard({ week, phaseColor, checked, onToggle }) {
   const pct = Math.round((doneCount / weekIds.length) * 100);
 
   return (
-    <div style={{ background:"#0f172a", borderRadius:10, border:`1px solid ${open ? phaseColor+"66" : "#1e293b"}`, marginBottom:10, overflow:"hidden", transition:"border-color .2s" }}>
-      {/* header */}
+    <div style={{background:"#0f172a", borderRadius:10, border:`1px solid ${open ? phaseColor+"66" : "#1e293b"}`, marginBottom:10, overflow:"hidden"}}>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"12px 16px", display:"flex", alignItems:"center", gap:12, textAlign:"left" }}
+        style={{width:"100%", background:"none", border:"none", cursor:"pointer", padding:"12px 16px", display:"flex", alignItems:"center", gap:12, textAlign:"left"}}
       >
-        <span style={{ color: phaseColor, fontSize:13, fontWeight:600, minWidth:60 }}>Нед. {week.num}</span>
-        <div style={{ flex:1 }}>
-          <div style={{ color:"#e2e8f0", fontSize:14, fontWeight:500, marginBottom:2 }}>{week.title}</div>
-          <div style={{ color:"#64748b", fontSize:12 }}>{week.dates} · {week.chapter}</div>
+        <span style={{color:phaseColor, fontSize:13, fontWeight:600, minWidth:55, flexShrink:0}}>Нед.{week.num}</span>
+        <div style={{flex:1, minWidth:0}}>
+          <div style={{color:"#e2e8f0", fontSize:14, fontWeight:500, marginBottom:2, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{week.title}</div>
+          <div style={{color:"#64748b", fontSize:12}}>{week.dates} · {week.chapter}</div>
         </div>
-        {/* progress pill */}
-        <div style={{ display:"flex", alignItems:"center", gap:8, flexShrink:0 }}>
-          <div style={{ background:"#1e293b", borderRadius:99, width:80, height:6, overflow:"hidden" }}>
-            <div style={{ background: phaseColor, width:`${pct}%`, height:"100%", transition:"width .3s", borderRadius:99 }} />
+        <div style={{display:"flex", alignItems:"center", gap:8, flexShrink:0}}>
+          <div style={{background:"#1e293b", borderRadius:99, width:60, height:5, overflow:"hidden"}}>
+            <div style={{background:phaseColor, width:`${pct}%`, height:"100%", borderRadius:99}} />
           </div>
-          <span style={{ color: doneCount === weekIds.length ? "#10b981" : "#64748b", fontSize:12, minWidth:36 }}>
-            {doneCount}/{weekIds.length}
-          </span>
-          <span style={{ color:"#475569", fontSize:12, transform: open ? "rotate(180deg)" : "none", transition:"transform .2s" }}>▼</span>
+          <span style={{color:doneCount===weekIds.length?"#10b981":"#64748b", fontSize:12, minWidth:32}}>{doneCount}/{weekIds.length}</span>
+          <span style={{color:"#475569", fontSize:12, transform:open?"rotate(180deg)":"none", transition:"transform .2s"}}>▼</span>
         </div>
       </button>
 
-      {/* body */}
       {open && (
-        <div style={{ borderTop:"1px solid #1e293b", padding:"12px 16px" }}>
-          {/* days */}
-          <div style={{ marginBottom:12 }}>
+        <div style={{borderTop:"1px solid #1e293b", padding:"12px 16px"}}>
+          <div style={{marginBottom:12}}>
             {week.days.map(day => (
-              <label key={day.id} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"7px 0", borderBottom:"1px solid #1e293b", cursor:"pointer" }}>
-                <input type="checkbox" checked={!!checked[day.id]} onChange={() => onToggle(day.id)} style={{ marginTop:2 }} />
-                <span style={{ color:"#94a3b8", fontSize:12, fontWeight:600, minWidth:24 }}>{day.day}</span>
-                <div style={{ flex:1 }}>
-                  <span style={{ color: checked[day.id] ? "#475569" : "#e2e8f0", fontSize:13, textDecoration: checked[day.id] ? "line-through" : "none", transition:"color .2s" }}>
+              <label key={day.id} style={{display:"flex", alignItems:"flex-start", gap:10, padding:"9px 0", borderBottom:"1px solid #1e293b", minHeight:44}}>
+                <input type="checkbox" checked={!!checked[day.id]} onChange={() => onToggle(day.id)} style={{marginTop:2}} />
+                <span style={{color:"#94a3b8", fontSize:12, fontWeight:600, minWidth:22, flexShrink:0}}>{day.day}</span>
+                <div style={{flex:1}}>
+                  <span style={{color:checked[day.id]?"#475569":"#e2e8f0", fontSize:13, textDecoration:checked[day.id]?"line-through":"none"}}>
                     {day.topic}
                   </span>
                 </div>
-                <span style={{ color:"#334155", fontSize:11, flexShrink:0, marginTop:1 }}>{day.ref}</span>
+                <span style={{color:"#334155", fontSize:11, flexShrink:0, marginTop:1, marginLeft:4}}>{day.ref}</span>
               </label>
             ))}
           </div>
-          {/* formulas */}
-          <div style={{ background:"#0d1f3c", borderRadius:8, padding:"10px 14px", borderLeft:`3px solid ${phaseColor}` }}>
-            <div style={{ color:"#94a3b8", fontSize:11, fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:6 }}>Ключевые формулы</div>
+          <div style={{background:"#0d1f3c", borderRadius:8, padding:"10px 14px", borderLeft:`3px solid ${phaseColor}`}}>
+            <div style={{color:"#94a3b8", fontSize:11, fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:6}}>Ключевые формулы</div>
             {week.formulas.map((f, i) => (
-              <div key={i} style={{ color:"#7dd3fc", fontSize:12, fontFamily:"'Courier New', monospace", padding:"2px 0" }}>→ {f}</div>
+              <div key={i} style={{color:"#7dd3fc", fontSize:12, fontFamily:"'Courier New', monospace", padding:"2px 0"}}>→ {f}</div>
             ))}
           </div>
         </div>
@@ -336,7 +400,6 @@ function WeekCard({ week, phaseColor, checked, onToggle }) {
   );
 }
 
-/* ─── PHASE CARD ─── */
 function PhaseCard({ phase, checked, onToggle }) {
   const [open, setOpen] = useState(false);
   const phaseIds = phase.weeks.flatMap(w => w.days.map(d => d.id));
@@ -344,34 +407,31 @@ function PhaseCard({ phase, checked, onToggle }) {
   const pct = Math.round((done / phaseIds.length) * 100);
 
   return (
-    <div style={{ borderRadius:14, border:`1px solid ${phase.color}44`, background: phase.bg, marginBottom:16, overflow:"hidden" }}>
-      {/* phase header */}
+    <div style={{borderRadius:14, border:`1px solid ${phase.color}44`, background:phase.bg, marginBottom:14, overflow:"hidden"}}>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"16px 20px", display:"flex", alignItems:"center", gap:14, textAlign:"left" }}
+        style={{width:"100%", background:"none", border:"none", cursor:"pointer", padding:"14px 16px", display:"flex", alignItems:"center", gap:12, textAlign:"left"}}
       >
-        <div style={{ background: phase.color+"33", borderRadius:8, padding:"6px 12px", border:`1px solid ${phase.color}55` }}>
-          <span style={{ color: phase.color, fontSize:12, fontWeight:700 }}>{phase.label}</span>
+        <div style={{background:phase.color+"33", borderRadius:8, padding:"5px 10px", border:`1px solid ${phase.color}55`, flexShrink:0}}>
+          <span style={{color:phase.color, fontSize:11, fontWeight:700}}>{phase.label}</span>
         </div>
-        <div style={{ flex:1 }}>
-          <div style={{ color:"#f1f5f9", fontSize:16, fontWeight:600 }}>{phase.title}</div>
-          <div style={{ color:"#64748b", fontSize:12, marginTop:2 }}>{phase.dates} · {phase.weeks.length} {phase.weeks.length === 1 ? "неделя" : "недели"}</div>
+        <div style={{flex:1, minWidth:0}}>
+          <div style={{color:"#f1f5f9", fontSize:15, fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{phase.title}</div>
+          <div style={{color:"#64748b", fontSize:12, marginTop:2}}>{phase.dates}</div>
         </div>
-        <div style={{ display:"flex", alignItems:"center", gap:10, flexShrink:0 }}>
-          <div style={{ textAlign:"right" }}>
-            <div style={{ color: pct === 100 ? "#10b981" : phase.color, fontSize:20, fontWeight:700 }}>{pct}%</div>
-            <div style={{ color:"#475569", fontSize:11 }}>{done}/{phaseIds.length}</div>
+        <div style={{display:"flex", alignItems:"center", gap:8, flexShrink:0}}>
+          <div style={{textAlign:"right"}}>
+            <div style={{color:pct===100?"#10b981":phase.color, fontSize:18, fontWeight:700}}>{pct}%</div>
+            <div style={{color:"#475569", fontSize:11}}>{done}/{phaseIds.length}</div>
           </div>
-          <span style={{ color:"#475569", fontSize:14, transform: open ? "rotate(180deg)" : "none", transition:"transform .2s" }}>▼</span>
+          <span style={{color:"#475569", fontSize:14, transform:open?"rotate(180deg)":"none", transition:"transform .2s"}}>▼</span>
         </div>
       </button>
-      {/* phase progress bar */}
-      <div style={{ height:3, background:"#1e293b", margin:"0 20px" }}>
-        <div style={{ height:"100%", background: phase.color, width:`${pct}%`, transition:"width .4s", borderRadius:99 }} />
+      <div style={{height:3, background:"#1e293b", margin:"0 16px"}}>
+        <div style={{height:"100%", background:phase.color, width:`${pct}%`, borderRadius:99}} />
       </div>
-
       {open && (
-        <div style={{ padding:"16px 20px 8px" }}>
+        <div style={{padding:"14px 16px 8px"}}>
           {phase.weeks.map(w => <WeekCard key={w.id} week={w} phaseColor={phase.color} checked={checked} onToggle={onToggle} />)}
         </div>
       )}
@@ -379,77 +439,49 @@ function PhaseCard({ phase, checked, onToggle }) {
   );
 }
 
-/* ─── HEADER STATS ─── */
-function Header({ checked }) {
-  const done = ALL_IDS.filter(id => checked[id]).length;
-  const pct = Math.round((done / ALL_IDS.length) * 100);
-
-  // weeks elapsed
-  const start = new Date("2026-02-26");
-  const now = new Date();
-  const weeksElapsed = Math.min(14, Math.max(0, Math.floor((now - start) / (7 * 86400000))));
-  const weeksLeft = Math.max(0, 14 - weeksElapsed);
-
-  return (
-    <div style={{ background:"linear-gradient(135deg, #1e293b 0%, #0f172a 100%)", borderRadius:16, padding:"24px 28px", marginBottom:24, border:"1px solid #334155" }}>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:16, marginBottom:20 }}>
-        <div>
-          <h1 style={{ color:"#f1f5f9", fontSize:22, fontWeight:700, marginBottom:4 }}>
-            Electronic Systems & Technologies
-          </h1>
-          <div style={{ color:"#64748b", fontSize:13 }}>
-            Экзамен — начало июня 2026 · 14 недель · ~10–12 ч/нед
-          </div>
-        </div>
-        <div style={{ display:"flex", gap:16 }}>
-          {[
-            { label:"Тем сделано", value:`${done}/${ALL_IDS.length}`, color:"#6366f1" },
-            { label:"Недель прошло", value:`${weeksElapsed}/14`, color:"#8b5cf6" },
-            { label:"Осталось недель", value:weeksLeft, color: weeksLeft <= 2 ? "#ef4444" : "#10b981" },
-          ].map(s => (
-            <div key={s.label} style={{ background:"#0f172a", borderRadius:10, padding:"10px 16px", textAlign:"center", border:"1px solid #1e293b" }}>
-              <div style={{ color: s.color, fontSize:20, fontWeight:700 }}>{s.value}</div>
-              <div style={{ color:"#64748b", fontSize:11, marginTop:2 }}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-      {/* global progress */}
-      <div style={{ display:"flex", alignItems:"center", gap:12 }}>
-        <div style={{ flex:1, background:"#1e293b", borderRadius:99, height:10, overflow:"hidden" }}>
-          <div style={{ height:"100%", background:"linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899)", width:`${pct}%`, transition:"width .5s", borderRadius:99 }} />
-        </div>
-        <span style={{ color:"#e2e8f0", fontWeight:700, fontSize:15, minWidth:40 }}>{pct}%</span>
-      </div>
-    </div>
-  );
-}
-
-/* ─── PRIORITY SECTION ─── */
-function PrioritySection() {
+/* ═══════════════════════════════════════════════════
+   AES COMPONENTS
+═══════════════════════════════════════════════════ */
+function AesModuleCard({ module, checked, onToggle }) {
   const [open, setOpen] = useState(false);
+  const ids = module.lectures.map(l => l.id);
+  const done = ids.filter(id => checked[id]).length;
+  const pct = Math.round((done / ids.length) * 100);
+
   return (
-    <div style={{ background:"#1e293b", borderRadius:14, border:"1px solid #334155", marginTop:16 }}>
+    <div style={{borderRadius:14, border:`1px solid ${module.color}44`, background:module.bg, marginBottom:14, overflow:"hidden"}}>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ width:"100%", background:"none", border:"none", cursor:"pointer", padding:"14px 20px", display:"flex", justifyContent:"space-between", alignItems:"center" }}
+        style={{width:"100%", background:"none", border:"none", cursor:"pointer", padding:"14px 16px", display:"flex", alignItems:"center", gap:12, textAlign:"left"}}
       >
-        <span style={{ color:"#e2e8f0", fontWeight:600, fontSize:15 }}>Приоритеты (если не хватает времени)</span>
-        <span style={{ color:"#475569", transform: open ? "rotate(180deg)" : "none", transition:"transform .2s" }}>▼</span>
+        <div style={{background:module.color+"33", borderRadius:8, padding:"5px 10px", border:`1px solid ${module.color}55`, flexShrink:0}}>
+          <span style={{color:module.color, fontSize:11, fontWeight:700}}>{module.label}</span>
+        </div>
+        <div style={{flex:1, minWidth:0}}>
+          <div style={{color:"#f1f5f9", fontSize:15, fontWeight:600, overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap"}}>{module.title}</div>
+          <div style={{color:"#64748b", fontSize:12, marginTop:2}}>{module.lectures.length} лекций</div>
+        </div>
+        <div style={{display:"flex", alignItems:"center", gap:8, flexShrink:0}}>
+          <div style={{textAlign:"right"}}>
+            <div style={{color:pct===100?"#10b981":module.color, fontSize:18, fontWeight:700}}>{pct}%</div>
+            <div style={{color:"#475569", fontSize:11}}>{done}/{ids.length}</div>
+          </div>
+          <span style={{color:"#475569", fontSize:14, transform:open?"rotate(180deg)":"none", transition:"transform .2s"}}>▼</span>
+        </div>
       </button>
+      <div style={{height:3, background:"#1e293b", margin:"0 16px"}}>
+        <div style={{height:"100%", background:module.color, width:`${pct}%`, borderRadius:99}} />
+      </div>
       {open && (
-        <div style={{ padding:"4px 20px 16px", display:"grid", gridTemplateColumns:"repeat(auto-fill, minmax(220px, 1fr))", gap:12 }}>
-          {PRIORITIES.map(p => (
-            <div key={p.rank} style={{ background:"#0f172a", borderRadius:10, padding:"12px 14px", borderTop:`3px solid ${p.color}` }}>
-              <div style={{ color: p.color, fontSize:11, fontWeight:700, textTransform:"uppercase", marginBottom:8, letterSpacing:.5 }}>
-                {p.rank}. {p.label}
-              </div>
-              {p.topics.map(t => (
-                <div key={t} style={{ color:"#94a3b8", fontSize:12, padding:"3px 0", display:"flex", gap:6 }}>
-                  <span style={{ color: p.color }}>·</span> {t}
-                </div>
-              ))}
-            </div>
+        <div style={{padding:"10px 16px 14px"}}>
+          {module.lectures.map(lec => (
+            <label key={lec.id} style={{display:"flex", alignItems:"center", gap:12, padding:"10px 0", borderBottom:"1px solid #1e293b", minHeight:44}}>
+              <input type="checkbox" checked={!!checked[lec.id]} onChange={() => onToggle(lec.id)} />
+              <span style={{color:module.color, fontSize:12, fontWeight:700, minWidth:36, flexShrink:0}}>{lec.code}</span>
+              <span style={{color:checked[lec.id]?"#475569":"#e2e8f0", fontSize:14, textDecoration:checked[lec.id]?"line-through":"none", flex:1}}>
+                {lec.title}
+              </span>
+            </label>
           ))}
         </div>
       )}
@@ -457,46 +489,130 @@ function PrioritySection() {
   );
 }
 
-/* ─── APP ─── */
+/* ═══════════════════════════════════════════════════
+   SHARED HEADER
+═══════════════════════════════════════════════════ */
+function Header({ checked, subject }) {
+  const ids      = subject === "esat" ? ESAT_ALL_IDS : AES_ALL_IDS;
+  const done     = ids.filter(id => checked[id]).length;
+  const pct      = Math.round((done / ids.length) * 100);
+  const color    = subject === "esat" ? "#6366f1" : "#06b6d4";
+  const gradient = subject === "esat"
+    ? "linear-gradient(90deg,#6366f1,#8b5cf6,#ec4899)"
+    : "linear-gradient(90deg,#06b6d4,#14b8a6,#10b981)";
+
+  return (
+    <div style={{background:"linear-gradient(135deg,#1e293b 0%,#0f172a 100%)", borderRadius:16, padding:"20px 16px", marginBottom:16, border:"1px solid #334155"}}>
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:12, marginBottom:16}}>
+        <div>
+          <h1 style={{color:"#f1f5f9", fontSize:18, fontWeight:700, marginBottom:3}}>
+            {subject === "esat" ? "Electronic Systems & Technologies" : "Applied Electronics"}
+          </h1>
+          <div style={{color:"#64748b", fontSize:12}}>
+            {subject === "esat" ? "ESaT · Экзамен начало июня 2026" : "AES · Applied Electronics & Systems"}
+          </div>
+        </div>
+        <div style={{display:"flex", gap:10, flexWrap:"wrap"}}>
+          {[
+            {label:"Выполнено", value:`${done}/${ids.length}`, col:color},
+            {label:"Прогресс",  value:`${pct}%`,               col:pct===100?"#10b981":color},
+          ].map(s => (
+            <div key={s.label} style={{background:"#0f172a", borderRadius:10, padding:"8px 14px", textAlign:"center", border:"1px solid #1e293b"}}>
+              <div style={{color:s.col, fontSize:18, fontWeight:700}}>{s.value}</div>
+              <div style={{color:"#64748b", fontSize:11, marginTop:1}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{display:"flex", alignItems:"center", gap:10}}>
+        <div style={{flex:1, background:"#1e293b", borderRadius:99, height:8, overflow:"hidden"}}>
+          <div style={{height:"100%", background:gradient, width:`${pct}%`, transition:"width .5s", borderRadius:99}} />
+        </div>
+        <span style={{color:"#e2e8f0", fontWeight:700, fontSize:14, minWidth:38}}>{pct}%</span>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   TAB SWITCHER
+═══════════════════════════════════════════════════ */
+function Tabs({ subject, setSubject }) {
+  const tabs = [
+    {id:"esat", label:"ESaT", sub:"Electronic Systems"},
+    {id:"aes",  label:"AES",  sub:"Applied Electronics"},
+  ];
+  return (
+    <div style={{display:"flex", gap:8, marginBottom:16}}>
+      {tabs.map(t => {
+        const active = subject === t.id;
+        return (
+          <button
+            key={t.id}
+            onClick={() => setSubject(t.id)}
+            style={{
+              flex:1, background: active ? "#1e293b" : "transparent",
+              border: active ? "1px solid #334155" : "1px solid #1e293b",
+              borderRadius:12, padding:"10px 12px", cursor:"pointer", textAlign:"center",
+              transition:"all .15s",
+            }}
+          >
+            <div style={{color: active ? "#f1f5f9" : "#475569", fontSize:16, fontWeight:700}}>{t.label}</div>
+            <div style={{color: active ? "#64748b" : "#334155", fontSize:11, marginTop:2}}>{t.sub}</div>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   APP
+═══════════════════════════════════════════════════ */
 function App() {
-  const [checked, setChecked] = useState(loadChecked);
+  const [checked,  setChecked]  = useState(loadChecked);
+  const [subject,  setSubject]  = useState("esat");
 
   const toggle = useCallback((id) => {
     setChecked(prev => {
-      const next = { ...prev, [id]: !prev[id] };
+      const next = {...prev, [id]: !prev[id]};
       saveChecked(next);
       return next;
     });
   }, []);
 
-  const resetAll = () => {
-    if (confirm("Сбросить весь прогресс?")) {
-      setChecked({});
-      saveChecked({});
-    }
+  const resetCurrent = () => {
+    const ids = subject === "esat" ? ESAT_ALL_IDS : AES_ALL_IDS;
+    const next = {...checked};
+    ids.forEach(id => delete next[id]);
+    setChecked(next);
+    saveChecked(next);
   };
 
   return (
-    <div style={{ maxWidth:860, margin:"0 auto", padding:"24px 16px 48px" }}>
-      <Header checked={checked} />
+    <div style={{maxWidth:860, margin:"0 auto", padding:"16px 12px 56px"}}>
+      <Tabs subject={subject} setSubject={setSubject} />
+      <Header checked={checked} subject={subject} />
 
-      <div style={{ display:"flex", justifyContent:"flex-end", marginBottom:12 }}>
+      <div style={{display:"flex", justifyContent:"flex-end", marginBottom:12}}>
         <button
-          onClick={resetAll}
-          style={{ background:"none", border:"1px solid #334155", color:"#64748b", borderRadius:8, padding:"6px 14px", fontSize:12, cursor:"pointer" }}
+          onClick={resetCurrent}
+          style={{background:"none", border:"1px solid #334155", color:"#64748b", borderRadius:8, padding:"6px 14px", fontSize:12, cursor:"pointer"}}
         >
-          Сбросить прогресс
+          Сбросить прогресс ({subject.toUpperCase()})
         </button>
       </div>
 
-      {PHASES.map(phase => (
+      {subject === "esat" && PHASES.map(phase => (
         <PhaseCard key={phase.id} phase={phase} checked={checked} onToggle={toggle} />
       ))}
 
-      <PrioritySection />
+      {subject === "aes" && AES_MODULES.map(mod => (
+        <AesModuleCard key={mod.id} module={mod} checked={checked} onToggle={toggle} />
+      ))}
 
-      <div style={{ textAlign:"center", color:"#334155", fontSize:12, marginTop:24 }}>
-        Прогресс сохраняется автоматически в localStorage браузера
+      <div style={{textAlign:"center", color:"#334155", fontSize:11, marginTop:20}}>
+        Прогресс сохраняется в localStorage · {subject.toUpperCase()}
       </div>
     </div>
   );
